@@ -61,13 +61,22 @@ public class UserProfile {
             Collection<UsersTests> newUsersTests = new ArrayList<>();
 
             // соберём только новые для того, чтобы добавить только их
+            outerloop:
             for (UsersTests usersTest : this.usersTestsCollection) {
-                if (oldUsersTests.contains(usersTest)) {continue;}
+                if (oldUsersTests.contains(usersTest)) {
+                    continue;
+                }
+
+                for (UsersTests oldUsersTest : oldUsersTests) {
+                    if (oldUsersTest.getPassDate().equals(usersTest.getPassDate())) {
+                        continue outerloop;
+                    }
+                }
                 newUsersTests.add(usersTest);
             }
 
             // может быть ошибка если каким-то образом будут 2 теста с одинаковыми user_id, test_id, pass_date
-            usersTestsDao.createAll(this.usersTestsCollection);
+            usersTestsDao.createAll(newUsersTests);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

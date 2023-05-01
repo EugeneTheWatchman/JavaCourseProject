@@ -98,6 +98,7 @@ public final class LeartIt {
             i++;
             boolean passed = userTest.isPassed();
             test = InsertWordTest.readFromDB(userTest.getTestId(), connection);
+            if (test == null) continue;
 
             String text = test.getTest().getText();
 
@@ -121,7 +122,6 @@ public final class LeartIt {
         variant.setText(scanner.nextLine());
 
         System.out.print("Правильный ли это варианта ответа +/-: ");
-        String temp = scanner.nextLine();
         variant.setRight(scanner.nextLine().equals("+"));
 
         try {
