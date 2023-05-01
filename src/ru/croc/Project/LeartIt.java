@@ -68,14 +68,14 @@ public final class LeartIt {
                     deleteTest(id);
                     break;
                 case 5:
-                    int testId = createTest(scan);
+                    int testId = createTest();
                     System.out.println("Добавьте 2 варианта для теста:");
-                    addVariantToTest(testId, scan);
-                    addVariantToTest(testId, scan);
+                    addVariantToTest(testId);
+                    addVariantToTest(testId);
                     break;
                 case 7:
                     System.out.print("Введите id теста к которому хотите добавить вариант: ");
-                    addVariantToTest(scan.nextInt(), scan);
+                    addVariantToTest(scan.nextInt());
                     break;
                 case 8:
                     System.out.print("Введие id варианта на удаление: ");
@@ -111,7 +111,9 @@ public final class LeartIt {
         }
     }
 
-    private static void addVariantToTest(int testId, Scanner scanner) {
+    private static void addVariantToTest(int testId) {
+        Scanner scanner = new Scanner(System.in);
+
         Variant variant = new Variant();
         variant.setId(-1);
         variant.setTestId(testId);
@@ -128,14 +130,16 @@ public final class LeartIt {
         }
     }
 
-    private static int createTest(Scanner scanner) {
+    private static int createTest() {
         Test test = new Test();
         test.setId(-1);
 
-        System.out.print("Введите тело теста: ");
+        scanner = new Scanner(System.in);
+
+        System.out.println("Введите тело теста: ");
         test.setText(scanner.nextLine());
-        System.out.print("Введите описание теста (опционально): ");
-        test.setDescription(scanner.nextLine());
+        System.out.println("Введите описание теста (опционально): ");
+        //test.setDescription(scanner.nextLine());
 
         try {
             TestDao testDao = new TestDao(connection);
