@@ -10,7 +10,11 @@ import java.time.LocalDateTime;
 
 public class Main {
     public static void main(String[] args) {
-        String url = "jdbc:h2:tcp://localhost:9092/~/IdeaProjects/JavaCourseProject/db/LearnIt";
+        String pathToDB = "~/IdeaProjects/JavaCourseProject/db/LearnIt";
+        if (args.length > 0) {
+            pathToDB = args[0];
+        }
+        String url = "jdbc:h2:tcp://localhost:9092/" + pathToDB;
         try (Connection conn = DriverManager.getConnection(url, "admin", "admin")) {
 
             LeartIt.main(conn);

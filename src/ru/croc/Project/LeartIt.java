@@ -51,7 +51,7 @@ public final class LeartIt {
             switch (selectedOption) {
                 case 1:
                     InsertWordTest test = chooseTest();
-
+                    if (test == null) {break;}
                     boolean testResult = runTest(test);
                     profile.addTest(test.getTest().getId(), testResult);
                     break;
@@ -103,6 +103,7 @@ public final class LeartIt {
             String text = test.getTest().getText();
 
             System.out.print(i + ") " + text + " - " + (passed ? "правильный(-е) вариант(ы): " : "неудача\n"));
+            if (!passed) {continue;}
             for (Variant variant : test.getVariants()) {
                 if (variant.isRight()) {
                     System.out.print(variant.getText() + ", ");
@@ -187,6 +188,11 @@ public final class LeartIt {
     private static InsertWordTest chooseTest() {
         if (availableTests.size() < 1) {
             getAvailableTestsIds();
+        }
+
+        if (availableTests.size() < 1) {
+            System.out.println("Вы решили все тесты!");
+            return null;
         }
 
         InsertWordTest availableTest = InsertWordTest.readVariantsFromDB(availableTests.get(0), connection);

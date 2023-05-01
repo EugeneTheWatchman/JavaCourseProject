@@ -29,6 +29,8 @@ public class UserProfile {
 
             user = new User(-1, login, false);
             userDao.create(user);
+            int id = userDao.read(user.getLogin()).getId();
+            user.setId(id);
             return user;
 
         } catch (SQLException e) {
