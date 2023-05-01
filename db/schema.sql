@@ -23,7 +23,7 @@ CREATE TABLE variants (
 	text		varchar(30)		NOT NULL,
 	is_right	boolean			NOT NULL,
 	constraint uk_variants_tesIid_text unique(text, test_id),
-	constraint fk_variants_test_id foreign key (test_id) references tests (id)
+	constraint fk_variants_test_id foreign key (test_id) references tests (id) on delete cascade
 );
 
 -- таблица с результатами похождения тестов у пользователей
@@ -34,6 +34,6 @@ CREATE TABLE users_tests (
 	is_passed	boolean		NOT NULL,
 	pass_date	timestamp	NOT NULL,
 	constraint uk_users_tests_user_test unique(user_id, test_id, pass_date),
-    constraint fk_users_tests_user foreign key (user_id) references users (id),
-    constraint fk_users_tests_test foreign key (test_id) references tests (id)
+    constraint fk_users_tests_user foreign key (user_id) references users (id) on delete cascade,
+    constraint fk_users_tests_test foreign key (test_id) references tests (id) on delete cascade
 );

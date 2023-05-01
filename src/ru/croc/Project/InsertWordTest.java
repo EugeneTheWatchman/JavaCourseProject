@@ -73,6 +73,20 @@ public class InsertWordTest {
         }
     }
 
+    public static InsertWordTest readVariantsFromDB(Test test, Connection connection) {
+
+        try {
+            if (test == null) { return null; }
+
+            VariantDao variantDao = new VariantDao(connection);
+            Collection<Variant> variants = variantDao.read(test.getId());
+
+            return new InsertWordTest(test, variants);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public Test getTest() {
         return test;
     }

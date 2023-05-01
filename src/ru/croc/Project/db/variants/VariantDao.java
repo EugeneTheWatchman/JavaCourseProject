@@ -63,4 +63,13 @@ public class VariantDao {
 
         deleteStatement.execute();
     }
+
+    public void deleteByTestId(int id) throws SQLException {
+        String sql = "DELETE FROM VARIANTS v \n" +
+                "WHERE v.test_id = ?;\n";
+        PreparedStatement deleteStatement = connection.prepareStatement(sql);
+        deleteStatement.setInt(1, id);
+
+        deleteStatement.execute();
+    }
 }

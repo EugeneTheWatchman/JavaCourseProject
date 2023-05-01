@@ -28,7 +28,7 @@ public class TestDao {
         try (PreparedStatement readStatement = connection.prepareStatement(sql)) {
 
             try (ResultSet resultSet = readStatement.executeQuery()) {
-                if (resultSet.next()) {
+                while (resultSet.next()) {
                     int id = resultSet.getInt("id");
                     String description = resultSet.getString("description");
                     String text = resultSet.getString(("text"));

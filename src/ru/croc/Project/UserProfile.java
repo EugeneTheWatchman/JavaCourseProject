@@ -80,6 +80,7 @@ public class UserProfile {
     public void addTest(int testId, boolean isPassed) {
         LocalDateTime passedTime = LocalDateTime.now();
         UsersTests userTest = new UsersTests(-1, this.user.getId(), testId, isPassed, passedTime);
+        usersTestsCollection.add(userTest);
     }
 
     public Collection<UsersTests> getUsersTestsCollection() {

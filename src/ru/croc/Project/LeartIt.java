@@ -3,8 +3,8 @@ package ru.croc.Project;
 import ru.croc.Project.db.tests.Test;
 import ru.croc.Project.db.tests.TestDao;
 import ru.croc.Project.db.usersTests.UsersTests;
-import ru.croc.Project.db.usersTests.UsersTestsDao;
 import ru.croc.Project.db.variants.Variant;
+import ru.croc.Project.db.variants.VariantDao;
 
 import java.sql.*;
 import java.util.*;
@@ -21,20 +21,22 @@ public final class LeartIt {
         System.out.println("Введите логин:");
         Scanner scan = new Scanner(System.in);
         String login = scan.nextLine();
-
+        if (login.length() > 30) {
+            System.out.println("Логин слишком длинный");
+        }
         profile = UserProfile.logIn(login, connection);
 
         boolean onGoing = true;
         while (onGoing) {
             String[] options;
             if (profile.getUser().isAdmin()) {
-                options = new String[]{"Запустить тест", "Сохранить прогресс и выйти",  "Вывести список тестов", "Создать тест", "Удалить тест", "Добавить вариант тесту"};
+                options = new String[]{"Запустить тест",  "Показать пройденные тесты", "Сохранить прогресс и выйти",  "Вывести список тестов", "Создать тест", "Удалить тест", "Добавить вариант тесту", "Удалить вариант"};
                 System.out.println("Выберите опцию:");
                 for (int i = 0; i < options.length; i++) {
                     System.out.println(i + 1 + ") " + options[i]);
                 }
             } else {
-                options = new String[]{"Запустить тест", "Сохранить прогресс и выйти"};
+                options = new String[]{"Запустить тест", "Показать пройденные тесты",  "Сохранить прогресс и выйти"};
                 for (int i = 0; i < options.length; i++) {
                     System.out.println(i + 1 + ") " + options[i]);
                 }
@@ -53,11 +55,127 @@ public final class LeartIt {
                     boolean testResult = runTest(test);
                     profile.addTest(test.getTest().getId(), testResult);
                     break;
-                case 2:
+                case 3:
                     profile.commitToDB(connection);
                     onGoing = false;
                     break;
+                case 4:
+                    showAllTests();
+                    break;
+                case 6:
+                    System.out.print("Введие id теста на удаление: ");
+                    int id = scan.nextInt();
+                    deleteTest(id);
+                    break;
+                case 5:
+                    int testId = createTest(scan);
+                    System.out.println("Добавьте 2 варианта для теста:");
+                    addVariantToTest(testId, scan);
+                    addVariantToTest(testId, scan);
+                    break;
+                case 7:
+                    System.out.print("Введите id теста к которому хотите добавить вариант: ");
+                    addVariantToTest(scan.nextInt(), scan);
+                    break;
+                case 8:
+                    System.out.print("Введие id варианта на удаление: ");
+                    int variantId = scan.nextInt();
+                    try {
+                        new VariantDao(connection).delete(variantId);
+                    } catch (SQLException e) {throw new RuntimeException(e);}
+                case 2:
+                    showTests();
+
             }
+        }
+    }
+
+
+    private static void showTests() {
+        InsertWordTest test;
+        int i = 0;
+        for (UsersTests userTest : profile.getUsersTestsCollection()) {
+            i++;
+            boolean passed = userTest.isPassed();
+            test = InsertWordTest.readFromDB(userTest.getTestId(), connection);
+
+            String text = test.getTest().getText();
+
+            System.out.print(i + ") " + text + " - " + (passed ? "правильный(-е) вариант(ы): " : "неудача\n"));
+            for (Variant variant : test.getVariants()) {
+                if (variant.isRight()) {
+                    System.out.print(variant.getText() + ", ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
+    private static void addVariantToTest(int testId, Scanner scanner) {
+        Variant variant = new Variant();
+        variant.setId(-1);
+        variant.setTestId(testId);
+        System.out.print("Введите текст варианта для теста: ");
+        variant.setText(scanner.nextLine());
+
+        System.out.print("Правильный ли это варианта ответа +/-: ");
+        variant.setRight(scanner.nextLine() == "+");
+
+        try {
+            new VariantDao(connection).create(variant);
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+    }
+
+    private static int createTest(Scanner scanner) {
+        Test test = new Test();
+        test.setId(-1);
+
+        System.out.print("Введите тело теста: ");
+        test.setText(scanner.nextLine());
+        System.out.print("Введите описание теста (опционально): ");
+        test.setDescription(scanner.nextLine());
+
+        try {
+            TestDao testDao = new TestDao(connection);
+            testDao.create(test);
+
+            int id = testDao.read(test.getText()).getId();
+            test.setId(id);
+            return id;
+
+        } catch (SQLException e) {
+            System.out.println(e);
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void deleteTest(int id) {
+        try {
+            new TestDao(connection).delete(id);
+
+        } catch (SQLException e) {
+            System.out.println(e);
+            throw new RuntimeException();
+        }
+
+    }
+
+    private static void showAllTests() {
+        System.out.println("id) test text \t/\t test description");
+        System.out.println("\t\tid) variant / is variant right");
+        try {
+            for (Test test : new TestDao(connection).readAll()) {
+                System.out.println(test.getId() + ") " + test.getText() + "\t\t\t" + test.getDescription());
+                Collection<Variant> variants = InsertWordTest.readVariantsFromDB(test, connection).getVariants();
+
+                for (Variant variant : variants) {
+                    System.out.println("\t\t" + variant.getId() + ") " + variant.getText() + "\t\t" + (variant.isRight() ? "right" : ""));
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -66,7 +184,7 @@ public final class LeartIt {
             getAvailableTestsIds();
         }
 
-        InsertWordTest availableTest = InsertWordTest.readFromDB(availableTests.get(0).getId(), connection);
+        InsertWordTest availableTest = InsertWordTest.readVariantsFromDB(availableTests.get(0), connection);
         availableTests.remove(0);
         return availableTest;
     }
@@ -102,16 +220,11 @@ public final class LeartIt {
         System.out.println(test.getTest().getText());
         System.out.println("Variants:");
 
-        ArrayList<String> variantsToInsert = new ArrayList<>();
-        for (Variant variant : test.getVariants()) {
-            variantsToInsert.add(variant.getText());
-        }
-
-        List<String> shuffledVariants = new ArrayList<>(variantsToInsert);
+        List<Variant> shuffledVariants = new ArrayList<>(test.getVariants());
         Collections.shuffle(shuffledVariants);
 
         for (int i = 0; i < shuffledVariants.size(); i++) {
-            System.out.println(i + 1 + ")" + shuffledVariants.get(i));
+            System.out.println(i + 1 + ")" + shuffledVariants.get(i).getText());
 
         }
         System.out.print("Enter a right variant number: ");
@@ -122,7 +235,7 @@ public final class LeartIt {
             System.out.println("Нет такого варианта ответа");
             rightVariant = scanner.nextInt() - 1;
         }
-        if (shuffledVariants.get(rightVariant).equals(variantsToInsert.get(0))) {
+        if (shuffledVariants.get(rightVariant).isRight()) {
             System.out.println("Выбран правильный вариант ответа");
             return true;
         } else {
