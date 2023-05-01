@@ -134,7 +134,7 @@ public final class LeartIt {
         Test test = new Test();
         test.setId(-1);
 
-        scanner = new Scanner(System.in);
+        Scanner scanner = new Scanner(System.in);
 
         System.out.println("Введите тело теста: ");
         test.setText(scanner.nextLine());
