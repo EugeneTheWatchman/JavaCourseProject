@@ -121,7 +121,8 @@ public final class LeartIt {
         variant.setText(scanner.nextLine());
 
         System.out.print("Правильный ли это варианта ответа +/-: ");
-        variant.setRight(scanner.nextLine() == "+");
+        String temp = scanner.nextLine();
+        variant.setRight(scanner.nextLine().equals("+"));
 
         try {
             new VariantDao(connection).create(variant);
@@ -136,10 +137,10 @@ public final class LeartIt {
 
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Введите тело теста: ");
+        System.out.print("Введите тело теста: ");
         test.setText(scanner.nextLine());
-        System.out.println("Введите описание теста (опционально): ");
-        //test.setDescription(scanner.nextLine());
+        System.out.print("Введите описание теста (опционально): ");
+        test.setDescription(scanner.nextLine());
 
         try {
             TestDao testDao = new TestDao(connection);
